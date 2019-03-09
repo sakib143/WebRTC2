@@ -29,6 +29,7 @@ import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.CameraEnumerator;
+import org.webrtc.CameraVideoCapturer;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
@@ -56,7 +57,7 @@ import retrofit2.Response;
 public class VideoCallActivity extends AppCompatActivity implements View.OnClickListener, SignallingClient.SignalingInterface {
 
     private PeerConnectionFactory peerConnectionFactory;
-    private MediaConstraints audioConstraints,videoConstraints,sdpConstraints;
+    private MediaConstraints audioConstraints, videoConstraints, sdpConstraints;
     private VideoSource videoSource;
     private VideoTrack localVideoTrack;
     private AudioSource audioSource;
@@ -65,7 +66,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
     private SurfaceViewRenderer localVideoView;
     private SurfaceViewRenderer remoteVideoView;
 
-    private Button end_call;
+    private Button end_call, btnSwichCamera;
     private PeerConnection localPeer;
     private List<IceServer> iceServers;
     private EglBase rootEglBase;
@@ -102,7 +103,9 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
         end_call = findViewById(R.id.end_call);
         localVideoView = findViewById(R.id.local_gl_surface_view);
         remoteVideoView = findViewById(R.id.remote_gl_surface_view);
+        btnSwichCamera = findViewById(R.id.btnSwichCamera);
         end_call.setOnClickListener(this);
+        btnSwichCamera.setOnClickListener(this);
     }
 
     private void initVideos() {
@@ -440,11 +443,18 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.end_call: {
+            case R.id.end_call:
                 hangup();
                 break;
-            }
+            case R.id.btnSwichCamera:
+                switchCamera();
+                break;
         }
+    }
+
+    private void switchCamera() {
+//        CameraVideoCapturer cameraVideoCapturer = (CameraVideoCapturer) videoCapturerAndroid;
+//        cameraVideoCapturer.switchCamera(null);
     }
 
     private void hangup() {
@@ -461,7 +471,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
 //            finish();
 
 
-            if(localPeer != null){
+            if (localPeer != null) {
                 localPeer.close();
                 localPeer = null;
             }
@@ -482,7 +492,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     protected void onDestroy() {
-        if(SignallingClient.getInstance() != null){
+        if (SignallingClient.getInstance() != null) {
             SignallingClient.getInstance().close();
         }
         super.onDestroy();
