@@ -30,7 +30,7 @@ import io.socket.client.Socket;
  */
 
 public class SignallingClient {
-    private static SignallingClient instance;
+    public static SignallingClient instance;
     private String roomName = null;
     private Socket socket;
     public boolean isChannelReady = false;
@@ -61,8 +61,8 @@ public class SignallingClient {
         }
         if (instance.roomName == null) {
             //set the room name here
-            instance.roomName = VideoCallActivity.ROOM_ID;
         }
+        instance.roomName = VideoCallActivity.ROOM_ID;
         return instance;
     }
 

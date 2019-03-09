@@ -15,9 +15,6 @@ import retrofit2.http.Url;
 
 
 public interface TurnServer {
-//    @POST("/123")
-//    Call<RoomResponseModel> getIceCandidates(@Header("Authorization") String authkey);
-
 
     @POST()
     Call<RoomResponseModel> getIceCandidates(@Url String apiname, @Header("Authorization") String authkey);

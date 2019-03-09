@@ -1,5 +1,6 @@
 package com.example.webrtcdemo2.Activity;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,7 +9,6 @@ import android.view.View;
 import com.androidnetworking.AndroidNetworking;
 import com.example.webrtcdemo2.R;
 import com.example.webrtcdemo2.WebFields.RoomResponseModel;
-import com.example.webrtcdemo2.WebFields.Utils;
 import com.example.webrtcdemo2.WebRTCLib.CustomPeerConnectionObserver;
 import com.example.webrtcdemo2.WebRTCLib.CustomSdpObserver;
 import com.example.webrtcdemo2.WebRTCLib.IceServer;
@@ -55,25 +55,23 @@ import retrofit2.Response;
 
 public class VideoCallActivity extends AppCompatActivity implements View.OnClickListener, SignallingClient.SignalingInterface {
 
-    PeerConnectionFactory peerConnectionFactory;
-    MediaConstraints audioConstraints;
-    MediaConstraints videoConstraints;
-    MediaConstraints sdpConstraints;
-    VideoSource videoSource;
-    VideoTrack localVideoTrack;
-    AudioSource audioSource;
-    AudioTrack localAudioTrack;
+    private PeerConnectionFactory peerConnectionFactory;
+    private MediaConstraints audioConstraints,videoConstraints,sdpConstraints;
+    private VideoSource videoSource;
+    private VideoTrack localVideoTrack;
+    private AudioSource audioSource;
+    private AudioTrack localAudioTrack;
 
-    SurfaceViewRenderer localVideoView;
-    SurfaceViewRenderer remoteVideoView;
+    private SurfaceViewRenderer localVideoView;
+    private SurfaceViewRenderer remoteVideoView;
 
-    Button hangup;
-    PeerConnection localPeer;
-    List<IceServer> iceServers;
-    EglBase rootEglBase;
+    private Button end_call;
+    private PeerConnection localPeer;
+    private List<IceServer> iceServers;
+    private EglBase rootEglBase;
 
     boolean gotUserMedia;
-    List<PeerConnection.IceServer> peerIceServers = new ArrayList<>();
+    private List<PeerConnection.IceServer> peerIceServers = new ArrayList<>();
 
 
     public static String ROOM_ID = "1212";
@@ -89,10 +87,11 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
 
 
         ROOM_ID = getIntent().getStringExtra("room_id");
+        SignallingClient.instance = null;
 
         initViews();
         initVideos();
-        getIceServers();
+        // getIceServers();
         SignallingClient.getInstance().init(this);
 
         start();
@@ -100,10 +99,10 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
 
 
     private void initViews() {
-        hangup = findViewById(R.id.end_call);
+        end_call = findViewById(R.id.end_call);
         localVideoView = findViewById(R.id.local_gl_surface_view);
         remoteVideoView = findViewById(R.id.remote_gl_surface_view);
-        hangup.setOnClickListener(this);
+        end_call.setOnClickListener(this);
     }
 
     private void initVideos() {
@@ -115,52 +114,52 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void getIceServers() {
-        //get Ice servers using xirsys
-        byte[] data = new byte[0];
-        try {
-            data = (Utils.SOCKET_URL).getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        String authToken = "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
-
-        Log.e("Token"," ==> " + authToken);
-
-
-
-        Utils.getInstance().getRetrofitInstance().getIceCandidates("join/" + ROOM_ID , authToken).enqueue(new Callback<RoomResponseModel>() {
-            @Override
-            public void onResponse(@NonNull Call<RoomResponseModel> call, @NonNull Response<RoomResponseModel> response) {
-                RoomResponseModel body = response.body();
-
-                Log.e("API response "," ==> " + body.toString());
-
-//                if (body != null) {
-//                    iceServers = body.iceServerList.iceServers;
-//                }
+//        //get Ice servers using xirsys
+//        byte[] data = new byte[0];
+//        try {
+//            data = (Utils.SOCKET_URL).getBytes("UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//        String authToken = "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
 //
-//                if (iceServers != null) {
-//                    for (IceServer iceServer : iceServers) {
-//                        if (iceServer.credential == null) {
-//                            PeerConnection.IceServer peerIceServer = PeerConnection.IceServer.builder(iceServer.url).createIceServer();
-//                            peerIceServers.add(peerIceServer);
-//                        } else {
-//                            PeerConnection.IceServer peerIceServer = PeerConnection.IceServer.builder(iceServer.url)
-//                                    .setUsername(iceServer.username)
-//                                    .setPassword(iceServer.credential)
-//                                    .createIceServer();
-//                            peerIceServers.add(peerIceServer);
-//                        }
-//                    }
-//                    Log.d("onApiResponse", "IceServers\n" + iceServers.toString());
-//                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<RoomResponseModel> call, @NonNull Throwable t) {
-                t.printStackTrace();
-            }
-        });
+//        Log.e("Token"," ==> " + authToken);
+//
+//
+//
+//        Utils.getInstance().getRetrofitInstance().getIceCandidates("join/" + ROOM_ID , authToken).enqueue(new Callback<RoomResponseModel>() {
+//            @Override
+//            public void onResponse(@NonNull Call<RoomResponseModel> call, @NonNull Response<RoomResponseModel> response) {
+//                RoomResponseModel body = response.body();
+//
+//                Log.e("API response "," ==> " + body.toString());
+//
+////                if (body != null) {
+////                    iceServers = body.iceServerList.iceServers;
+////                }
+////
+////                if (iceServers != null) {
+////                    for (IceServer iceServer : iceServers) {
+////                        if (iceServer.credential == null) {
+////                            PeerConnection.IceServer peerIceServer = PeerConnection.IceServer.builder(iceServer.url).createIceServer();
+////                            peerIceServers.add(peerIceServer);
+////                        } else {
+////                            PeerConnection.IceServer peerIceServer = PeerConnection.IceServer.builder(iceServer.url)
+////                                    .setUsername(iceServer.username)
+////                                    .setPassword(iceServer.credential)
+////                                    .createIceServer();
+////                            peerIceServers.add(peerIceServer);
+////                        }
+////                    }
+////                    Log.d("onApiResponse", "IceServers\n" + iceServers.toString());
+////                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<RoomResponseModel> call, @NonNull Throwable t) {
+//                t.printStackTrace();
+//            }
+//        });
     }
 
 
@@ -450,10 +449,31 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
 
     private void hangup() {
         try {
-            localPeer.close();
-            localPeer = null;
+//            if(localPeer != null){
+//                localPeer.close();
+//                localPeer = null;
+//            }
+//            SignallingClient.getInstance().close();
+//            updateVideoViews(false);
+//
+//            Intent intent = new Intent(VideoCallActivity.this, RoomActivity.class);
+//            startActivity(intent);
+//            finish();
+
+
+            if(localPeer != null){
+                localPeer.close();
+                localPeer = null;
+            }
             SignallingClient.getInstance().close();
             updateVideoViews(false);
+
+            Intent intent = new Intent(VideoCallActivity.this, RoomActivity.class);
+            startActivity(intent);
+            finish();
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -462,7 +482,9 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     protected void onDestroy() {
-        SignallingClient.getInstance().close();
+        if(SignallingClient.getInstance() != null){
+            SignallingClient.getInstance().close();
+        }
         super.onDestroy();
     }
 
